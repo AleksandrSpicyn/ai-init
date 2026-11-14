@@ -54,3 +54,90 @@ singleton/static state. Cache identity включает те контексты,
 
 Дополнительно: [testing.md](testing.md), [apidoc.md](apidoc.md),
 [concurrency-and-delivery.md](concurrency-and-delivery.md).
+
+## Пример policy для Article
+
+`app/Policies/ArticlePolicy.php` либо `Publishing/Policies/ArticlePolicy.php`:
+
+```php
+namespace App\Policies;
+
+use App\Models\Article;
+use App\Models\User;
+
+final class ArticlePolicy
+{
+    public function view(User $actor, Article $article): bool
+    {
+        return $article->user_id === $actor->getKey();
+    }
+
+    public function update(User $actor, Article $article): bool
+    {
+        return $article->user_id === $actor->getKey();
+    }
+}
+```
+
+Если тип ключа модели отличается, приведите обе стороны к согласованному типу,
+а не используйте нестрогое сравнение для маскировки несоответствия.
+Модульная policy может потребовать явной регистрации:
+
+```php-fragment
+Gate::policy(
+    \App\Modules\Publishing\Models\Article::class,
+    \App\Modules\Publishing\Policies\ArticlePolicy::class,
+);
+```
+
+Наличие класса policy не доказывает вызов. На границе изменения нужен, например,
+`Gate::forUser($actor)->authorize('update', $article)` до записи или эквивалент
+через Form Request / middleware. После этого проверяется HTTP-поведение.
+
+### Ошибка scope и исправление
+
+Плохо: `Article::findOrFail($id)` в списке «мои публикации» без дальнейшей
+проверки actor. Для list query нужен фильтр владельца:
+
+```php-fragment
+Article::query()
+    ->where('user_id', $actor->getKey())
+    ->with('author')
+    ->get();
+```
+
+Для item endpoint допустимы policy после binding или scoped lookup согласно
+контракту `403`/`404`. Не считайте случайный `404` от несовпавшего route constraint
+доказательством корректной авторизации.
+
+### Тест отказа на запись
+
+Отдельный update endpoint предполагает route `articles.update` и policy выше;
+он не добавляется этим документом к минимальному store/index примеру:
+
+```php
+use App\Models\Article;
+use App\Models\User;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
+
+it('не изменяет публикацию другого пользователя', function (): void {
+    $actor = User::factory()->create();
+    $owner = User::factory()->create();
+    $article = Article::factory()->for($owner, 'author')->create(['title' => 'До']);
+
+    actingAs($actor)->patchJson(route('articles.update', $article), [
+        'title' => 'После',
+    ])->assertForbidden();
+
+    assertDatabaseHas(Article::class, [
+        'id' => $article->id,
+        'user_id' => $owner->id,
+        'title' => 'До',
+    ]);
+});
+```
+
+Для API, скрывающего чужие записи, ожидается `assertNotFound()`. Выбор статуса
+не отменяет проверку неизменности и отсутствия dispatch/file/external effects.

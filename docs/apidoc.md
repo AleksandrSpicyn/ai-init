@@ -137,3 +137,175 @@ Response calls способны выполнять запись и внешни�
 Правила переносов и длины строк выбираются проектом с учётом parser; не
 разрывайте аннотацию способом, который меняет её смысл. Не редактируйте generated
 output вместо его источника, если генерация является принятым workflow.
+
+## 9. Полный docblock создания ресурса
+
+Пример продолжает `articles.store` из [architecture.md](architecture.md).
+Показывает стандартную грамматику Scribe 5.x: входной `user_id` запрещён,
+`author` присутствует в этом endpoint благодаря явной загрузке связи.
+Успешный JSON не получает выдуманные поля `success` и `message`.
+
+```php
+/**
+ * Создать публикацию
+ *
+ * Сохраняет публикацию текущего пользователя и возвращает её с автором.
+ * Назначить владельца через тело запроса нельзя.
+ *
+ * @group Публикации
+ * @authenticated
+ * @header Accept application/json
+ * @header Content-Type application/json
+ * @bodyParam title string required Заголовок, не более 200 символов. Example: Переносимый пример
+ * @bodyParam is_published boolean required Признак публикации. Example: false
+ * @response 201 scenario="Публикация создана" {
+ *   "data": {
+ *     "id": 7,
+ *     "title": "Переносимый пример",
+ *     "is_published": false,
+ *     "author": {"id": 3, "name": "Автор"}
+ *   }
+ * }
+ * @responseField data object Созданная публикация.
+ * @responseField data.id integer Идентификатор публикации.
+ * @responseField data.title string Заголовок.
+ * @responseField data.is_published boolean Признак публикации.
+ * @responseField data.author object Автор публикации.
+ * @responseField data.author.id integer Идентификатор автора.
+ * @responseField data.author.name string Имя автора.
+ */
+```
+
+Authentication в сквозном примере зависит от guard приложения. Для bearer API
+дополнительно укажите `@header Authorization Bearer {ACCESS_TOKEN}` и настройте
+auth scheme генератора; для session API опишите cookie/CSRF по его контракту.
+`@header` имеет собственную грамматику; не вставляйте туда автоматически
+`string required`, взятые из `@bodyParam`.
+
+Ошибки `401`/`422` добавляются с фактическим телом и локалью. Например, только
+если exception handler действительно возвращает следующий формат:
+
+```php
+/**
+ * @response 422 scenario="Не указан заголовок" {
+ *   "message": "Укажите заголовок.",
+ *   "errors": {"title": ["Укажите заголовок."]}
+ * }
+ * @response 401 scenario="Требуется вход" {"message":"Unauthenticated."}
+ */
+```
+
+Это условный пример error handler, не обещание стандартного перевода Laravel.
+Тексты и status проверяются через реальные запросы целевого приложения.
+
+## 10. Query, вложенные массивы, файлы и response files
+
+Ниже отдельный пример bulk endpoint, не дополнительный input `articles.store`:
+
+```php
+/**
+ * @urlParam article integer required Идентификатор публикации. Example: 7
+ * @queryParam page integer Номер страницы. Example: 1
+ * @queryParam per_page integer Размер страницы, от 1 до 100. Example: 20
+ * @bodyParam items object[] required Элементы пакетной операции.
+ * @bodyParam items[].title string required Заголовок элемента. Example: Пример
+ * @bodyParam items[].status string required Статус. Enum: draft, published. Example: draft
+ * @bodyParam attachment file Вложение PDF до 5 МБ. No-example
+ * @responseFile 200 scenario="Пакет обработан" docs/responses/articles-bulk.json
+ */
+```
+
+Response-file путь здесь обозначает файл, который должен быть создан в целевом
+приложении из его реального ответа. Это не ссылка на существующий asset ai-init.
+Не копируйте такой тег без файла. `No-example` не является заменой validation
+файла; validation MIME/size и access проверяются кодом и тестами.
+
+Примеры `Enum:`/`Example:` должны согласовываться. Закрытый enum не выводится
+из одного `message`, `true`, `0` или `null` в response scenario.
+
+### JSON schema: что не потерять
+
+| Значение | Что зафиксировать |
+|---|---|
+| `[]` | Список, тип items если он известен; не объект |
+| `{}` | Объект, известные свойства или разрешённые дополнительные ключи |
+| `null` | Возможность null отдельно от отсутствия ключа |
+| `"12.50"` | Строка, даже если по смыслу деньги |
+| `12.5` | JSON number; не обещать точную decimal arithmetic |
+| Условный `author` | Когда ключ присутствует и какой тип имеет значение |
+| Paginated data | Настоящие `data`, `links`, `meta`, а не сокращённая догадка |
+
+Сначала соберите union всех достижимых полей, затем сопоставьте варианты
+конкретным response scenarios. Условное поле `whenLoaded` не входит в schema
+endpoint, который никогда не загружает эту связь. `whenNull` и `MissingValue`
+нельзя считать одинаковым результатом.
+
+## 11. Расширенная грамматика: отдельный переносимый контракт
+
+Если генератор приложения поддерживает schema modifiers через custom strategy,
+следующий профиль можно сохранить как явно выбранное расширение. Таблица
+описывает требуемую семантику расширения, а не встроенные гарантии Scribe.
+Без реализованного parser/strategy используйте поддерживаемые attributes,
+validator extraction или явную OpenAPI schema.
+
+```text
+@<tag> <path> <type> [required] [deprecated] [modifiers...] <description>
+    [Enum: <values>] [Example: <value> | No-example]
+```
+
+| Modifier | Тип | Результат в schema |
+|---|---|---|
+| `min`, `max` | integer/number | minimum/maximum |
+| `min`, `max` | string | minLength/maxLength |
+| `min`, `max` | array | minItems/maxItems |
+| `gt`, `gte`, `lt`, `lte` | integer/number | exclusive/inclusive bounds по версии OpenAPI |
+| `pattern` | string | pattern |
+| `format` | подходящий scalar | format |
+| `uniqueItems` | array | uniqueItems |
+| `default` | совместимый scalar | default |
+
+Для такого расширения заранее задайте правила:
+
+1. Modifiers идут до описания; неизвестные, повторные или несовместимые значения
+   вызывают ошибку генерации, а не молча исчезают.
+2. Typed arrays сохраняют item type; container example не кодируется строкой.
+3. Nullable и optional различаются; поддержку `type|null` проверяйте отдельно.
+4. Explicit example имеет явный приоритет; default/example проходят проверку
+   типа и enum. Не генерируйте случайные response values вместо сценария.
+5. Даты `Y-m-d H:i:s` получают реальный pattern; их нельзя объявлять RFC 3339.
+6. Success schema metadata не накладывается на error response того же пути поля.
+
+Пример только для установленного расширения:
+
+```text
+@queryParam per_page integer min=1 max=100 default=20 Размер страницы. Example: 20
+@bodyParam displayed_at string|null format="Y-m-d H:i:s" Время показа.
+```
+
+Таким образом полезная таблица ограничений остаётся в руководстве, но не
+заставляет новый проект зависеть от чужого parser implementation.
+
+## 12. Проверка docblock против HTTP-контракта
+
+```php
+use App\Models\User;
+
+use function Pest\Laravel\actingAs;
+
+it('возвращает документированную форму созданной публикации', function (): void {
+    $actor = User::factory()->create();
+
+    actingAs($actor)->postJson(route('articles.store'), [
+        'title' => 'Документированный пример',
+        'is_published' => true,
+    ])->assertCreated()
+        ->assertJsonPath('data.title', 'Документированный пример')
+        ->assertJsonPath('data.is_published', true)
+        ->assertJsonPath('data.author.id', $actor->id)
+        ->assertJsonMissingPath('data.author.email');
+});
+```
+
+Это иллюстрация тех же assertions, а не требование дублировать уже существующий
+ArticleStoreTest. Дополнительно проверяются generated schema и response examples;
+Feature-тест сам по себе не подтверждает корректность работы документационного parser.

@@ -56,3 +56,29 @@ identity/invalidation и реальный runtime. Конкурентность 
 
 Связанные документы: [testing.md](testing.md), [code-style.md](code-style.md),
 [authorization.md](authorization.md), [apidoc.md](apidoc.md).
+
+## Пример границ изменения
+
+Задача: список возвращает чужие Article. Достаточная работа:
+
+1. Найти route, query-owner и реальный actor/context.
+2. Добавить scope до фильтров/pagination, сохранить прежний response contract.
+3. Добавить matching и decoy записи в существующий endpoint-тест.
+4. Проверить отсутствие чужих записей, а не только число результатов.
+5. Выполнить затронутые tests/static checks и сверить diff.
+
+Это не требует одновременно переписывать auth, менять таблицы и строить новый
+query framework. Но минимальный scope не означает отказ от нужных assertions,
+документированных гарантий и проверки всех затронутых consumers.
+
+Пример рекомендуемого порядка проверок при наличии инструментов:
+
+```bash
+vendor/bin/pint --dirty
+vendor/bin/phpstan analyse
+php artisan test --compact tests/Feature/ArticleIndexTest.php
+```
+
+Это примеры стандартных инструментов, не готовая команда для любой среды.
+Если task runner включает контейнер и дополнительные настройки, используйте его.
+Static analysis scope и настройки берутся из целевого приложения.

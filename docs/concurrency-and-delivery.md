@@ -69,3 +69,52 @@ Benchmark сравнивает одинаковый объём данных, с�
 измеряемую границу и ограничения; локальное ускорение не является SLA endpoint.
 Связанные правила: [testing.md](testing.md), [authorization.md](authorization.md),
 [activity-log.md](activity-log.md).
+
+## Пример transaction и dispatch после commit
+
+Фрагмент Action предполагает существующие `$article`, `$actor` и queued job
+`IndexArticle`; он показывает порядок, а не определяет способ индексации:
+
+```php-fragment
+DB::transaction(function () use ($article, $actor): void {
+    $article->is_published = true;
+    $article->save();
+
+    IndexArticle::dispatch($article->getKey(), $actor->getKey())->afterCommit();
+});
+```
+
+Без настроенного после-commit поведения worker может увидеть старое состояние.
+Даже `afterCommit()` не превращает commit БД и отправку брокеру в одну атомарную
+операцию; при требовании durable доставки нужен дополнительный механизм.
+
+## Пример идемпотентного consumer
+
+Для канала, присылающего полное состояние сущности с монотонной `version`:
+
+```javascript
+function applyArticleEvent(current, incoming) {
+  if (incoming.id !== current.id || incoming.version <= current.version) {
+    return current;
+  }
+
+  return { ...current, ...incoming };
+}
+```
+
+Этот алгоритм подходит snapshots. Для delta-events пропущенная версия может
+требовать resync, а не применения следующего delta поверх неполного состояния.
+Server также должен авторизовать подписку и исключить лишние поля payload.
+
+## Что сравнить перед конкурентной оптимизацией
+
+| Проверка | Последовательный путь | Конкурентный путь |
+|---|---|---|
+| Результат | Поля, scope, ordering | Тот же контракт |
+| Ошибка одного источника | Полный отказ или partial contract | Та же согласованная семантика |
+| Query/external calls | Реальное число и размеры | Без случайного дублирования |
+| Время | Повторяемый baseline | Измеренное распределение, не один удачный запуск |
+| Ограничения | Connections, память | Дополнительный worker/pool budget |
+
+Не запускайте independent-looking writes параллельно, пока не проверены общие
+locks, unique constraints, порядок событий и способность safely retry.

@@ -12,11 +12,12 @@ configuration, and nearby implementations before applying this skill. Discover
 actual source/test paths, namespaces, commands, languages, guards, and contracts;
 no particular directory layout or application API is required.
 
-Repository rules and installed package versions determine concrete APIs and
-conventions. Architectural examples below apply only when the target already
-uses that pattern; do not add layers, wrappers, helpers, or dependencies merely
-to satisfy this skill. If local guidance is absent, prefer framework defaults
-and the smallest change consistent with nearby code.
+Use the concrete conventions and examples in this skill as a recommended
+starter baseline. Distinguish that baseline from framework/package requirements
+and from application-specific extensions. Preserve an explicitly different
+existing convention; otherwise apply the documented rule rather than reducing
+it to “follow local style”. Check installed versions before using package APIs.
+Standard and modular profiles change file placement, not behavioral guarantees.
 
 Read local documentation when it exists and is relevant; verify it against
 current code. Other skills are optional companions when installed, not required
@@ -60,3 +61,9 @@ skill installation may omit them; use available local guidance and the bundled
 references instead. These guides describe both standard and modular layouts.
 
 - [Naming conventions](../../docs/naming.md)
+
+## Practical Examples
+
+Read [references/examples.md](references/examples.md) when implementing or
+reviewing this behavior. It contains concrete code, assumptions and pitfalls
+for adaptation to standard or modular Laravel applications.

@@ -52,3 +52,81 @@ check mode. После автоправок просмотрите итог: н�
 Проверки запускаются по риску и правилам проекта. Для документов без PHP-изменений
 обычно достаточно проверки содержимого и ссылок. Статический успех не заменяет
 [тесты поведения](testing.md), CI или runtime verification.
+
+## Рекомендуемый готовый стиль
+
+Для нового проекта этот набор можно принять без привязки к приложению:
+
+- короткие массивы `[]`, одинарные кавычки без интерполяции
+- строгие сравнения `===`/`!==`, логические `&&`/`||`
+- boolean operators в начале продолженной строки
+- фигурные скобки у всех control structures
+- trailing comma у многострочных arrays/parameters/match
+- blank line перед return/throw/continue/break и самостоятельными control blocks
+- явные типы параметров, свойств и результата; constructor property promotion
+- `?Type` для простого nullable в сигнатуре, `Type|null` в PHPDoc
+- enum cases в `UPPER_SNAKE_CASE`, backed values по контракту
+- PHPDoc tags в порядке `@param`, `@return`, `@throws`
+- без ведущего `_` у неиспользуемых framework callback parameters
+
+Закрепите эти настройки formatter и static analysis. Существующий formatter
+может выбирать другие переносы: не объявляйте форматирование дефектом без
+принятого правила, но и не удаляйте сами правила из starter-набора.
+
+### Типизированный контракт вместо неясного массива
+
+```php
+namespace App\Dto;
+
+final readonly class ArticleFilter
+{
+    public function __construct(
+        public ?bool $published,
+        public int $perPage = 20,
+    ) {}
+}
+```
+
+### Условие, early exit и array shape
+
+```php
+namespace App\Support;
+
+final class PublicationSummary
+{
+    /** @return array{title: string, is_published: bool} */
+    public static function make(string $title, bool $published): array
+    {
+        if ($title === '') {
+            return ['title' => 'Без заголовка', 'is_published' => false];
+        }
+
+        return ['title' => $title, 'is_published' => $published];
+    }
+}
+```
+
+### Enum без выдуманного helper trait
+
+```php
+namespace App\Enums;
+
+enum PublicationStatus: string
+{
+    case DRAFT = 'draft';
+    case PUBLISHED = 'published';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::DRAFT => 'Черновик',
+            self::PUBLISHED => 'Опубликовано',
+        };
+    }
+}
+```
+
+Если у приложения есть shared enum helper, используйте его вместо копирования
+метода в каждом enum. Не импортируйте отсутствующий trait из другого проекта.
+Статус здесь — отдельный вариант модели; он не добавляется автоматически к
+сквозному Article с boolean `is_published`.

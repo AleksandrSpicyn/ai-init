@@ -51,3 +51,102 @@ HTTP-тест обычно проверяет статус, поля errors и �
 Точную формулировку проверяйте отдельно, когда она является контрактом, например
 для custom rule или локализации. Покройте существенные missing/null/invalid и
 scope-сценарии; правила размещения — в [testing.md](testing.md).
+
+## Пример вложенной валидации и aliases
+
+Отдельный endpoint пакетного создания; это не дополнительные поля одиночного
+`articles.store`. Стандартный путь — `app/Http/Requests/StoreArticleBatchRequest.php`,
+модульный — `Publishing/Requests/StoreArticleBatchRequest.php`.
+
+```php
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+final class StoreArticleBatchRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return $this->user() !== null;
+    }
+
+    /** @return array<string, list<string>> */
+    public function rules(): array
+    {
+        return [
+            'items' => ['required', 'array', 'min:1', 'max:100'],
+            'items.*.title' => ['required', 'string', 'max:200'],
+            'items.*.is_published' => ['required', 'boolean'],
+        ];
+    }
+
+    /** @return array<string, string> */
+    public function attributes(): array
+    {
+        return [
+            'items' => 'публикации',
+            'items.*.title' => 'заголовок публикации',
+            'items.*.is_published' => 'признак публикации',
+        ];
+    }
+}
+```
+
+Фрагмент `lang/ru/validation.php`, если выбран русский язык:
+
+```php
+return [
+    'required' => 'Заполните поле «:attribute».',
+    'max' => [
+        'string' => 'Поле «:attribute» не должно превышать :max символов.',
+        'array' => 'Поле «:attribute» не должно содержать больше :max элементов.',
+    ],
+    'attributes' => [
+        'title' => 'заголовок',
+    ],
+];
+```
+
+Это фрагмент перевода: объедините его с существующим файлом, не удаляйте
+остальные типы `max`, translations и общие attributes.
+
+### Scoped existence и авторизация
+
+```php-fragment
+Rule::exists('categories', 'id')->where('user_id', $this->user()->getAuthIdentifier());
+```
+
+Фрагмент предполагает таблицу categories и проверяет допустимый foreign ID.
+Policy всё равно должна разрешать действие, а constraints/транзакция — защищать
+инвариант от гонки. Не заменяйте этим проверку прав на изменение самой Article.
+
+### Dataset для границ
+
+Для `articles.store` из сквозного примера:
+
+```php
+use App\Models\Article;
+use App\Models\User;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseCount;
+
+it('отклоняет некорректный заголовок', function (mixed $title): void {
+    $actor = User::factory()->create();
+
+    actingAs($actor)->postJson(route('articles.store'), [
+        'title' => $title,
+        'is_published' => false,
+    ])->assertUnprocessable()->assertJsonValidationErrors('title');
+
+    assertDatabaseCount(Article::class, 0);
+})->with([
+    'null' => [null],
+    'пустая строка' => [''],
+    'превышение длины' => [str_repeat('a', 201)],
+]);
+```
+
+Точный текст перевода проверяется отдельным localization/custom-rule case,
+если он является предметом изменения; endpoint case сохраняет устойчивые
+assertions на поля и отсутствие записи.
