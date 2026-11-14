@@ -59,3 +59,11 @@ Use focused integration coverage for the changed write path. Establish an
 activity baseline after fixture setup. Verify subject, event, normalized diff,
 actor/source, no-op suppression, tenant scope and rollback behavior where
 relevant. Avoid duplicating package infrastructure tests.
+
+## Companion Guides
+
+When using the ai-init checkout, consult the relevant guides below. A standalone
+skill installation may omit them; use available local guidance and the bundled
+references instead. These guides describe both standard and modular layouts.
+
+- [Activity logging](../../docs/activity-log.md)

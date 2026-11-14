@@ -1,6 +1,6 @@
 ---
 name: et-github-pr-review
-description: Use when reviewing modular Laravel GitHub PRs or current-branch diffs, including requested changes, pre-merge checks, review comments, architecture/naming/testing/API-doc rules, resources and response contracts, regressions, N+1, data migrations, Octane/runtime, AI/tooling, security-sensitive code, duplication, hardcoded values, style, language, or quality-gate results. Do not use for generic GitHub issue triage without code review.
+description: Use when reviewing standard or modular Laravel GitHub PRs or current-branch diffs, including requested changes, pre-merge checks, review comments, architecture/naming/testing/API-doc rules, resources and response contracts, regressions, N+1, data migrations, Octane/runtime, AI/tooling, security-sensitive code, duplication, hardcoded values, style, language, or quality-gate results. Do not use for generic GitHub issue triage without code review.
 ---
 
 # GitHub PR Review
@@ -76,3 +76,13 @@ keep GitHub-facing comments concise and free of process metadata.
 Use subagents only when the user explicitly asks for them. Keep all GitHub
 posting centralized in the main agent; subagents may return evidence and
 candidate findings, but they must not post directly.
+
+## Companion Guides
+
+When using the ai-init checkout, consult the relevant guides below. A standalone
+skill installation may omit them; use available local guidance and the bundled
+references instead. These guides describe both standard and modular layouts.
+
+- [General development rules](../../docs/general.md)
+- [Architecture profiles](../../docs/architecture.md)
+- [Testing](../../docs/testing.md)

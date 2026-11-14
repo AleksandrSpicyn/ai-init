@@ -59,3 +59,11 @@ clear field names, and examples that match the endpoint behavior.
 - Touched validation output uses the project target language.
 - API documentation examples use real DTO or route fields.
 - Custom Rule message text has isolated coverage when exact wording matters.
+
+## Companion Guides
+
+When using the ai-init checkout, consult the relevant guides below. A standalone
+skill installation may omit them; use available local guidance and the bundled
+references instead. These guides describe both standard and modular layouts.
+
+- [Validation and localization](../../docs/validation.md)

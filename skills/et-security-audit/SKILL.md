@@ -1,6 +1,6 @@
 ---
 name: et-security-audit
-description: Use when reviewing modular Laravel projects for realistic security risks in repository-wide, branch-diff, module, endpoint, or finding-level work involving public API, admin authorization, tenant or context scope, file/media exposure, imports/exports, auth flows, logs, raw SQL, queues, cache, or Octane runtime state.
+description: Use when reviewing standard or modular Laravel projects for realistic security risks in repository-wide, branch-diff, module, endpoint, or finding-level work involving public API, admin authorization, tenant or context scope, file/media exposure, imports/exports, auth flows, logs, raw SQL, queues, cache, or Octane runtime state.
 ---
 
 # Security Audit
@@ -24,7 +24,7 @@ dependencies. Keep verification proportional to the changed behavior.
 
 ## Overview
 
-Use this reusable skill for security work in modular Laravel repositories.
+Use this reusable skill for security work in standard or modular Laravel repositories.
 It complements generic Laravel security guidance without editing externally
 provided or package-owned skills.
 
@@ -118,3 +118,12 @@ Use this structure:
 - Confirm sensitive values do not leak through Resources, files, logs or cache.
 - Confirm realistic tests exist for forbidden access, validation failures and
   non-leakage behavior.
+
+## Companion Guides
+
+When using the ai-init checkout, consult the relevant guides below. A standalone
+skill installation may omit them; use available local guidance and the bundled
+references instead. These guides describe both standard and modular layouts.
+
+- [Authorization and scope](../../docs/authorization.md)
+- [Runtime and delivery](../../docs/concurrency-and-delivery.md)

@@ -1,6 +1,6 @@
 ---
 name: et-php-style-quality
-description: Use when editing or reviewing PHP style, typing, PHPDoc, enums, array contracts, Pint/Rector/PHPStan output, or quality gates in modular Laravel projects.
+description: Use when editing or reviewing PHP style, typing, PHPDoc, enums, array contracts, Pint/Rector/PHPStan output, or quality gates in standard or modular Laravel projects.
 ---
 
 # PHP Style Quality
@@ -58,3 +58,11 @@ local style over generic PSR-12 summaries.
 - Verify typing and docblocks are coherent.
 - Verify no helper or modernization introduced noise unrelated to the task.
 - Run the relevant local verification before handing work back.
+
+## Companion Guides
+
+When using the ai-init checkout, consult the relevant guides below. A standalone
+skill installation may omit them; use available local guidance and the bundled
+references instead. These guides describe both standard and modular layouts.
+
+- [PHP style and verification](../../docs/code-style.md)

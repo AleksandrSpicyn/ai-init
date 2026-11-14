@@ -1,6 +1,6 @@
 ---
 name: et-module-architecture
-description: Use when creating or changing modular Laravel routes, controllers, DTOs, actions, tasks, repositories, processors, resources, providers, exceptions, events, listeners, notifications, admin code, shared abstractions, or integrations.
+description: Use when organizing Laravel application architecture in standard shared directories or domain modules, including routes, controllers, validation, use cases, persistence, resources, providers, administrative code, and integrations.
 ---
 
 # et-module-architecture
@@ -45,3 +45,12 @@ Check sibling files and current route/provider registration before adding files.
 Keep integrations behind a contract when a real external boundary warrants it.
 Use related naming, validation, package, testing, and API-documentation skills
 when available and relevant.
+
+## Companion Guides
+
+When using the ai-init checkout, consult the relevant guides below. A standalone
+skill installation may omit them; use available local guidance and the bundled
+references instead. These guides describe both standard and modular layouts.
+
+- [Architecture profiles](../../docs/architecture.md)
+- [Concurrency and delivery](../../docs/concurrency-and-delivery.md)

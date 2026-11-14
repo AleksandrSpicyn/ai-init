@@ -1,6 +1,6 @@
 ---
 name: et-rest-naming-conventions
-description: Use when naming or reviewing REST routes, controllers, models, tables, relations, DTOs, resources, permissions, artifacts, factories, or tests in modular Laravel projects.
+description: Use when naming or reviewing REST routes, controllers, models, tables, relations, DTOs, resources, permissions, artifacts, factories, or tests in standard or modular Laravel projects.
 ---
 
 # REST Naming Conventions
@@ -52,3 +52,11 @@ design and code structure.
 - Verify route, migration, model, relation, permission, factory, and test names
   use one coherent vocabulary before merge.
 - Prefer renaming new inconsistent names instead of carrying them forward.
+
+## Companion Guides
+
+When using the ai-init checkout, consult the relevant guides below. A standalone
+skill installation may omit them; use available local guidance and the bundled
+references instead. These guides describe both standard and modular layouts.
+
+- [Naming conventions](../../docs/naming.md)

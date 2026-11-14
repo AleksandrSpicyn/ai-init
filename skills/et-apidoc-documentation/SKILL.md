@@ -56,3 +56,12 @@ dependencies. Keep verification proportional to the changed behavior.
 - Keep language, error-code notation, grouping and line width aligned with the
   target's documentation conventions. Do not require a particular heading,
   language, response envelope or local date-time parser extension.
+
+## Companion Guides
+
+When using the ai-init checkout, consult the relevant guides below. A standalone
+skill installation may omit them; use available local guidance and the bundled
+references instead. These guides describe both standard and modular layouts.
+
+- [API documentation](../../docs/apidoc.md)
+- [Architecture profiles](../../docs/architecture.md)

@@ -1,6 +1,6 @@
 ---
 name: et-spatie-package-conventions
-description: Use when creating or changing modular Laravel DTOs with spatie/laravel-data, media handling with spatie/laravel-medialibrary, settings classes with spatie/laravel-settings, or roles and permissions with spatie/laravel-permission in an existing modular Laravel project.
+description: Use when creating or changing standard or modular Laravel DTOs with spatie/laravel-data, media handling with spatie/laravel-medialibrary, settings classes with spatie/laravel-settings, or roles and permissions with spatie/laravel-permission in an existing standard or modular Laravel project.
 ---
 
 # Spatie Package Conventions
@@ -59,3 +59,11 @@ only when the task explicitly scopes them in.
 - For new usage of supported Spatie packages, follow the repository package
   onboarding template only when the task explicitly scopes it in. Do not use
   this skill to onboard unrelated packages.
+
+## Companion Guides
+
+When using the ai-init checkout, consult the relevant guides below. A standalone
+skill installation may omit them; use available local guidance and the bundled
+references instead. These guides describe both standard and modular layouts.
+
+- [Package integration](../../docs/package-integration.md)

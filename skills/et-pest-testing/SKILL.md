@@ -1,6 +1,6 @@
 ---
 name: et-pest-testing
-description: Use when adding, editing, reviewing, or fixing Pest tests, factories, endpoint assertions, permission coverage, scoped cases, or fake assertions in modular Laravel projects.
+description: Use when adding, editing, reviewing, or fixing Pest tests, factories, endpoint assertions, permission coverage, scoped cases, or fake assertions in standard or modular Laravel projects.
 ---
 
 # Pest Testing
@@ -65,3 +65,11 @@ explicit, and placed according to configured discovery.
 - Verify super-admin helper usage is reserved for bypass behavior.
 - Verify the test covers the behavior, not the implementation details.
 - Add or update tests for every behavior change, not only for green paths.
+
+## Companion Guides
+
+When using the ai-init checkout, consult the relevant guides below. A standalone
+skill installation may omit them; use available local guidance and the bundled
+references instead. These guides describe both standard and modular layouts.
+
+- [Testing in both architecture profiles](../../docs/testing.md)
