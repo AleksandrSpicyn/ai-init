@@ -1,0 +1,4 @@
+interface:
+  display_name: "Module Architecture"
+  short_description: "Portable modular Laravel boundaries and references"
+  default_prompt: "Use $et-module-architecture for Laravel module, admin, Resource, and layer-boundary changes; keep package mechanics in package-specific guidance."

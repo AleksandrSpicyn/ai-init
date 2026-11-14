@@ -1,0 +1,54 @@
+---
+name: et-rest-naming-conventions
+description: Use when naming or reviewing REST routes, controllers, models, tables, relations, DTOs, resources, permissions, artifacts, factories, or tests in modular Laravel projects.
+---
+
+# REST Naming Conventions
+
+## Adapting to the Target Repository
+
+Read the target repository's instructions, dependency manifests and lockfiles,
+configuration, and nearby implementations before applying this skill. Discover
+actual source/test paths, namespaces, commands, languages, guards, and contracts;
+no particular directory layout or application API is required.
+
+Repository rules and installed package versions determine concrete APIs and
+conventions. Architectural examples below apply only when the target already
+uses that pattern; do not add layers, wrappers, helpers, or dependencies merely
+to satisfy this skill. If local guidance is absent, prefer framework defaults
+and the smallest change consistent with nearby code.
+
+Read local documentation when it exists and is relevant; verify it against
+current code. Other skills are optional companions when installed, not required
+dependencies. Keep verification proportional to the changed behavior.
+
+## Overview
+
+Use project naming rules instead of ad hoc Laravel habits. Read
+the repository naming documentation; use this skill's references when a name affects both URI
+design and code structure.
+
+## References
+
+- `references/http-and-layers.md` for routes, controllers, DTOs, resources,
+  admin placement, permissions, and test names.
+- `references/database-and-eloquent.md` for tables, pivots, foreign keys,
+  booleans, dates, external identifiers, and relations.
+- `references/artifact-names.md` for events, listeners, jobs, commands,
+  migrations, seeders, factories, tests, and config/env/translation keys.
+
+## Trigger Boundaries
+
+- Trigger before creating a new persisted name or public contract.
+- Trigger during review when a name differs from nearby module conventions.
+- Check legacy names before renaming; old names may be accepted only because
+  they are already part of a schema or external contract.
+- Prefer renaming before merge when the inconsistent name is new.
+- Do not apply naming cleanup to generated, vendor, externally provided, or
+  package-owned code unless the user explicitly scopes it in.
+
+## Must Check
+
+- Verify route, migration, model, relation, permission, factory, and test names
+  use one coherent vocabulary before merge.
+- Prefer renaming new inconsistent names instead of carrying them forward.
